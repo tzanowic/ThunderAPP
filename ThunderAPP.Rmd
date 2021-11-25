@@ -1,0 +1,46 @@
+---
+title: "Thunder App"
+output: html_notebook
+---
+
+```{r, include = FALSE}
+library(ggplot2)
+library(mosaic)
+library(tidyverse)
+library(ggalt)
+library(DT)
+library(knitr)
+```
+
+```{r}
+Shots <- read.csv("shots_data.csv")
+head(Shots)
+```
+
+
+```{r}
+distance <- function(x,y){
+  distc <- sqrt((x^2) + (y^2))
+  return(distc)
+}
+
+Shots <- 
+  Shots %>%
+  mutate(distc = distance(x,y))
+
+Shots <-
+  Shots %>%
+  mutate(shottype = ifelse(abs(x) > 22 & y <= 7.8, "CornerThree", ifelse(distc > 23.75, "ThreePt", "TwoPt"))) %>%
+  mutate(ThreePM = ifelse(shottype == "CornerThree" & fgmade == 1, 1, ifelse(shottype == "ThreePt" & fgmade == 1, 1, 0)))
+
+head(Shots)
+
+Shots %>%
+  group_by(team, shottype) %>%
+  summarise(shots = n(), dist = shots/280, eFG = (sum(fgmade) + .5*sum(ThreePM))/ n())
+```
+
+
+
+
+
